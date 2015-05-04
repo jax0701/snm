@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.link {
+  stroke: #888;
+  stroke-width : 2;
+}
+
+.node text {
+  pointer-events: none;
+  font: 10px sans-serif;
+}
+
+.node circle{
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+</style>
+<body>
+<!--  <meta http-equiv=refresh content="10,./index.html"> -->
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<script>
+
+
+var width = screen.width,
+	height = screen.height;
+
+var color = d3.scale.category20();
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var force = d3.layout.force()
+    		  .charge(-120)
+              .linkDistance(50)
+              .size([width, height]);
+
+d3.json("miserables.json", function(error, json) {
+  force
+      .nodes(json.nodes)
+      .links(json.links)
+      .start();
+
+  var link = svg.selectAll(".link")
+      .data(json.links)
+      .enter().append("line")
+      .attr("class", "link")
+      .style("stroke", function(d) { if (d.group == 0){
+    	  								return "#888"
+      									}
+          								else if (d.group == 1)
+      									return "red"
+      									else if (d.group == 2)
+          								return "blue"
+          								else if (d.group == 3)
+              							return "green"
+              							else if (d.group == 4)
+                  						return "Purple"
+                  						else 
+                      					return "#"+(12309*d.group%999)
+      									})
+      									
+      									
+      .style("stroke-width", function(d) { return d.value });
+
+  var node = svg.selectAll(".node")
+      .data(json.nodes)
+      .enter().append("g")
+      .attr("class", "node")
+      .call(force.drag);
+  
+
+	  node.append("circle")
+	  	  .attr("r", function(d) { 
+		  	           if(d.group < 100){
+	  		  			   if(d.rate == 1)
+							   return 7;
+				   		   else 
+	      					   return 10*10*d.rate
+	  	  				}
+	  	  			else{
+	  	  			   return 5;
+	  	  			} 
+					})		
+					
+		  .style("fill", function(d) {if (d.group == 0)return "black";
+    	  							else if (d.group == 1)return "blue";
+    	  							else if (d.group == 2)return "red";
+    	  							else if (d.group == 3)return "green";
+    	  							else if (d.group >= 100)return "black"; 
+    	  							else return "black"
+    	  							})
+	  	    
+	        .style("stroke", function(d) { if (d.group >= 100){
+			return "red"
+			}
+			else if (d.group == 1)
+			return "red"
+			else if (d.group == 2)
+			return "blue"
+			else if (d.group == 3)
+			return "green"
+			else if (d.group == 4)
+			return "Purple"
+			else if (d.group >= 100)
+			return "black"
+			else
+			return "#"+(12309*d.group%999)
+			})
+			
+			
+			.style("stroke-width", function(d) { if (d.group >= 100)
+			return 2
+			else 
+			return 0.1
+			});
+	      
+	  	 
+	  node.append("text")
+	      .attr("dx", 12)
+	      .attr("dy", ".35em")
+	      .text(function(d) { return d.id });
+
+	  force.on("tick", function() {
+	    link.attr("x1", function(d) { return d.source.x; })
+	        .attr("y1", function(d) { return d.source.y; })
+	        .attr("x2", function(d) { return d.target.x; })
+	        .attr("y2", function(d) { return d.target.y; });
+
+    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+  });
+});
+
+</script>
